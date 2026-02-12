@@ -203,10 +203,12 @@ jobs:
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
 
-        echo "=== FORCING CLEAN ==="
-        touch .scmversion
-        touch .version
-        echo "=== FORCE DONE ==="
+        echo "=== TOUCHING ALL SOURCE FILES ==="
+        find . -name "*.c" -exec touch {} \;
+        find . -name "*.h" -exec touch {} \;
+        find . -name "Makefile" -exec touch {} \;
+        find . -name "Kconfig" -exec touch {} \;
+        echo "=== TOUCH DONE ==="
         
         # 7. 刷新配置
         make ARCH=${{ env.ARCH }} olddefconfig O=out
