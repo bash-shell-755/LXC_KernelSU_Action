@@ -128,11 +128,16 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        
-        # 1. 彻底清理
-        echo "cleaning up"
+
+        echo "=== PWD ==="
+        pwd
+
+        echo "=== LS ==="
+        ls -la Makefile
+
+        echo "=== RUN MRPROPER ==="
         make ARCH=arm64 mrproper
-        echo "done"
+        echo "=== MRPROPER DONE ==="
         
         # 2. KernelSU（在干净源码上打补丁）
         if [ '${{ env.ENABLE_KERNELSU }}' = 'true' ]; then
