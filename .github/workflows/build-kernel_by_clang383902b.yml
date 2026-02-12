@@ -189,26 +189,32 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-
-        # check .config location...
-        echo check config
-        ls -la out/.config || echo "out config NOT FOUND"
-        ls -la .config || echo "root config NOT FOUND"
         
+        # 1. 直接复制厂商的完整 .config（这是关键！）
+        echo "=== COPYING VENDOR .CONFIG ==="
+        cp arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} .config
+        mkdir -p out
+        cp .config out/.config
+        echo "Copied ${{ env.KERNEL_CONFIG }} to .config"
+        
+        # 2. 环境变量（原样）
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/google_clang/clang-r383902b-11.0.2/bin:$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/google_gcc/aarch64-linux-android-4.9/bin:$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/google_gcc/arm-linux-androideabi-4.9/bin:$PATH
         export KBUILD_BUILD_HOST=Github-Action
         export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
+        
         if [ ! -z ${{ env.KSU_EXPECTED_SIZE }} ] && [ ! -z ${{ env.KSU_EXPECTED_HASH }} ]; then
           export KSU_EXPECTED_SIZE=${{ env.KSU_EXPECTED_SIZE }}
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
-        fi 
-
-        ls -la arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || exit 1
-        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi- ${{ env.KERNEL_CONFIG }} || exit 1
+        fi
+        
+        # 3. 刷新配置（把 .config 里未定义的项设为默认）
+        make ARCH=${{ env.ARCH }} olddefconfig O=out
+        
+        # 4. 编译（原样）
         if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi- 
+            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-
         else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-  
+            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-
         fi
 
     - name: Check a kernel output files
