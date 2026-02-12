@@ -183,7 +183,7 @@ jobs:
       if: env.ENABLE_CCACHE == 'true'
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: build-kernel-${{ env.DEVICE }}${{ env.UPLOADNAME }}
+        key: build-kernel-${{ env.DEVICE }}${{ env.UPLOADNAME }}-1
         max-size: 2G
 
     - name: Build kernel
