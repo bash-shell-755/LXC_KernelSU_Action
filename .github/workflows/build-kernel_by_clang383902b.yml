@@ -189,6 +189,9 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+
+        # 0. 彻底清理源码目录（解决不干净问题）
+        make ARCH=${{ env.ARCH }} mrproper
         
         # 1. 直接复制厂商的完整 .config（这是关键！）
         echo "=== COPYING VENDOR .CONFIG ==="
