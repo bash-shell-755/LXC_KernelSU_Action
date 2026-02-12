@@ -209,6 +209,10 @@ jobs:
         find . -name "Makefile" -exec touch {} \;
         find . -name "Kconfig" -exec touch {} \;
         echo "=== TOUCH DONE ==="
+
+        echo "=== REMOVING .GIT ==="
+        rm -rf .git
+        echo "=== GIT REMOVED ==="
         
         # 7. 刷新配置
         make ARCH=${{ env.ARCH }} olddefconfig O=out
