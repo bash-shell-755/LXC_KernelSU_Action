@@ -202,6 +202,9 @@ jobs:
           export KSU_EXPECTED_SIZE=${{ env.KSU_EXPECTED_SIZE }}
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
+
+        find . -name "*.c" -exec touch {} \;
+        find . -name "*.h" -exec touch {} \;
         
         # 7. 刷新配置
         make ARCH=${{ env.ARCH }} olddefconfig O=out
